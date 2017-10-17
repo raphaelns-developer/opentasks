@@ -50,11 +50,13 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.TextView;
 
-import org.dmfs.android.bolts.color.colors.ValueColor;
+import org.dmfs.android.bolts.color.elementary.ValueColor;
 import org.dmfs.android.retentionmagic.SupportFragment;
 import org.dmfs.android.retentionmagic.annotations.Parameter;
 import org.dmfs.android.retentionmagic.annotations.Retain;
 import org.dmfs.tasks.contract.TaskContract.Tasks;
+import org.dmfs.tasks.detailsscreen.SubtasksView;
+import org.dmfs.tasks.detailsscreen.SubtasksViewParamsSource;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.model.Model;
 import org.dmfs.tasks.model.OnContentChangeListener;
@@ -69,6 +71,8 @@ import org.dmfs.tasks.widget.TaskView;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.reactivex.disposables.CompositeDisposable;
 
 
 /**
@@ -129,6 +133,8 @@ public class ViewTaskFragment extends SupportFragment
      * The actual detail view. We store this direct reference to be able to clear it when the fragment gets detached.
      */
     private TaskView mDetailView;
+
+    private CompositeDisposable mDisposables;
 
     private int mListColor;
     private int mOldStatus = -1;
@@ -207,14 +213,6 @@ public class ViewTaskFragment extends SupportFragment
     }
 
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the fragment (e.g. upon screen orientation changes).
-     */
-    public ViewTaskFragment()
-    {
-    }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -265,6 +263,7 @@ public class ViewTaskFragment extends SupportFragment
             mDetailView.setValues(null);
         }
 
+        mDisposables.dispose();
     }
 
 
@@ -318,6 +317,8 @@ public class ViewTaskFragment extends SupportFragment
             mTaskUri = null;
             loadUri(uri);
         }
+
+        mDisposables = new CompositeDisposable();
 
         return mRootView;
     }
@@ -445,6 +446,12 @@ public class ViewTaskFragment extends SupportFragment
                 ((TextView) mToolBar.findViewById(R.id.toolbar_title)).setText(TaskFieldAdapters.TITLE.get(mContentSet));
             }
         }
+
+        mDisposables.add(new SubtasksViewParamsSource(mAppContext, mTaskUri, new ValueColor(mListColor))
+                .subscribe(subtasksViewParams ->
+                {
+                    new SubtasksView(mContent).update(subtasksViewParams);
+                }));
     }
 
 
