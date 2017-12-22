@@ -270,6 +270,8 @@ public class ViewTaskFragment extends SupportFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+        mDisposables = new CompositeDisposable();
+
         mShowFloatingActionButton = getResources().getBoolean(R.bool.opentasks_enabled_detail_view_fab);
 
         mRootView = inflater.inflate(R.layout.fragment_task_view_detail, container, false);
@@ -317,8 +319,6 @@ public class ViewTaskFragment extends SupportFragment
             mTaskUri = null;
             loadUri(uri);
         }
-
-        mDisposables = new CompositeDisposable();
 
         return mRootView;
     }
