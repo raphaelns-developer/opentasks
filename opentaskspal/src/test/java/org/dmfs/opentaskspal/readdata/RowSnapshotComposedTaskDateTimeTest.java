@@ -37,11 +37,11 @@ import static org.mockito.Mockito.doReturn;
 
 
 /**
- * Unit test for {@link TaskDateTime}.
+ * Unit test for {@link RowSnapshotComposedTaskDateTime}.
  *
  * @author Gabor Keszthelyi
  */
-public final class TaskDateTimeTest
+public final class RowSnapshotComposedTaskDateTimeTest
 {
 
     @Test
@@ -50,7 +50,7 @@ public final class TaskDateTimeTest
         RowDataSnapshot<Tasks> mockData = failingMock(RowDataSnapshot.class);
         doReturn(absent()).when(mockData).data(eq(Tasks.DTSTART), any());
 
-        assertThat(new TaskDateTime(Tasks.DTSTART, mockData), AbsentMatcher.<DateTime>isAbsent());
+        assertThat(new RowSnapshotComposedTaskDateTime(Tasks.DTSTART, mockData), AbsentMatcher.<DateTime>isAbsent());
     }
 
 
@@ -63,7 +63,7 @@ public final class TaskDateTimeTest
         doReturn(new Present<>(timeStamp)).when(mockData).data(eq(Tasks.DTSTART), any());
         doReturn(new Present<>(true)).when(mockData).data(eq(Tasks.IS_ALLDAY), any());
 
-        DateTime actual = new TaskDateTime(Tasks.DTSTART, mockData).value();
+        DateTime actual = new RowSnapshotComposedTaskDateTime(Tasks.DTSTART, mockData).value();
         assertTrue(actual.isAllDay());
         assertEquals(new DateTime(timeStamp).toAllDay(), actual);
     }
@@ -79,7 +79,7 @@ public final class TaskDateTimeTest
         doReturn(new Present<>(false)).when(mockData).data(eq(Tasks.IS_ALLDAY), any());
         doReturn(new Present<>(TimeZone.getTimeZone("UTC"))).when(mockData).data(eq(Tasks.TZ), any());
 
-        DateTime actual = new TaskDateTime(Tasks.DTSTART, mockData).value();
+        DateTime actual = new RowSnapshotComposedTaskDateTime(Tasks.DTSTART, mockData).value();
         assertFalse(actual.isAllDay());
         assertEquals(timeStamp, actual.getTimestamp());
     }
@@ -95,7 +95,7 @@ public final class TaskDateTimeTest
         doReturn(new Present<>(false)).when(mockData).data(eq(Tasks.IS_ALLDAY), any());
         doReturn(new Present<>(TimeZone.getTimeZone("Europe/Berlin"))).when(mockData).data(eq(Tasks.TZ), any());
 
-        DateTime actual = new TaskDateTime(Tasks.DTSTART, mockData).value();
+        DateTime actual = new RowSnapshotComposedTaskDateTime(Tasks.DTSTART, mockData).value();
         assertFalse(actual.isAllDay());
         assertEquals(timeStamp, actual.getTimestamp());
         assertEquals("Europe/Berlin", actual.getTimeZone().getID());

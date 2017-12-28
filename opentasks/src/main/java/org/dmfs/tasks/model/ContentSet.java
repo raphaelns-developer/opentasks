@@ -22,6 +22,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.dmfs.tasks.utils.AsyncContentLoader;
@@ -367,6 +368,7 @@ public final class ContentSet implements OnContentLoadedListener, Parcelable
     }
 
 
+    @Nullable
     public Integer getAsInteger(String key)
     {
         final ContentValues after = mAfterContentValues;
@@ -402,6 +404,7 @@ public final class ContentSet implements OnContentLoadedListener, Parcelable
     }
 
 
+    @Nullable
     public Long getAsLong(String key)
     {
         final ContentValues after = mAfterContentValues;
@@ -437,6 +440,7 @@ public final class ContentSet implements OnContentLoadedListener, Parcelable
     }
 
 
+    @Nullable
     public String getAsString(String key)
     {
         final ContentValues after = mAfterContentValues;
@@ -472,6 +476,7 @@ public final class ContentSet implements OnContentLoadedListener, Parcelable
     }
 
 
+    @Nullable
     public Float getAsFloat(String key)
     {
         final ContentValues after = mAfterContentValues;
