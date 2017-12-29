@@ -73,7 +73,7 @@ class TaskDataBaseUpgradeTest {
             dbHelper.onUpgrade(it, 18, 19)
         }
 
-        dbHelper.writableDatabase.use {
+        dbHelper.readableDatabase.use {
             val size = it.select(TASKS)
                     .columns(_ID, TZ)
                     .parseList(object : MapRowParser<String> {
