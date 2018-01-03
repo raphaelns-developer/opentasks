@@ -20,7 +20,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 
-import org.dmfs.opentaskspal.readdata.CursorTaskDateTime;
+import org.dmfs.opentaskspal.readdata.cursor.CursorTaskDateTime;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.model.OnContentChangeListener;

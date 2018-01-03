@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 dmfs GmbH
+ * Copyright 2018 dmfs GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.dmfs.opentaskspal.readdata;
+package org.dmfs.opentaskspal.readdata.cursor;
 
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import org.dmfs.jems.optional.decorators.Mapped;
+import org.dmfs.opentaskspal.readdata.ComposedTaskDateTime;
 import org.dmfs.optional.NullSafe;
 import org.dmfs.optional.decorators.DelegatingOptional;
 import org.dmfs.rfc5545.DateTime;
@@ -35,16 +36,14 @@ import java.util.TimeZone;
 public final class CursorTaskDateTime extends DelegatingOptional<DateTime>
 {
     public CursorTaskDateTime(@NonNull Cursor cursor,
-                              @NonNull String timestampField,
-                              @NonNull String tzField,
-                              @NonNull String alldayField)
+                              @NonNull String timestampColumn,
+                              @NonNull String timezoneColumn,
+                              @NonNull String alldayColumn)
     {
         super(new ComposedTaskDateTime(
-                // TODO Checking for 0 is not good, use cursor.isNull() instead
-                new Conditional<>((Long ts) -> ts > 0, cursor.getLong(cursor.getColumnIndexOrThrow(timestampField))),
-                new Mapped<>(TimeZone::getTimeZone, new NullSafe<>(cursor.getString(cursor.getColumnIndexOrThrow(tzField)))),
-                () -> new Mapped<>("1"::equals, new NullSafe<>(cursor.getString(cursor.getColumnIndexOrThrow(alldayField))))
-                        .value(false)
+                new LongNullSafeCursorColumnValue(cursor, timestampColumn),
+                new Mapped<>(TimeZone::getTimeZone, new NullSafe<>(cursor.getString(cursor.getColumnIndexOrThrow(timezoneColumn)))),
+                new BooleanCursorColumnValue(cursor, alldayColumn)
         ));
     }
 }
