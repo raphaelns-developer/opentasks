@@ -32,6 +32,8 @@ import org.dmfs.android.bolts.color.Color;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.utils.BaseActivity;
 
+import static org.dmfs.optional.Absent.absent;
+
 
 /**
  * An activity representing a single Task detail screen. This activity is only used on handset devices. On tablet-size devices, item details are presented
@@ -65,7 +67,7 @@ public class ViewTaskActivity extends BaseActivity implements ViewTaskFragment.C
 
         if (savedInstanceState == null)
         {
-            ViewTaskFragment fragment = ViewTaskFragment.newInstance(getIntent().getData());
+            ViewTaskFragment fragment = ViewTaskFragment.newInstance(getIntent().getData(), absent());
             getSupportFragmentManager().beginTransaction().add(R.id.task_detail_container, fragment).commit();
         }
     }
@@ -124,7 +126,7 @@ public class ViewTaskActivity extends BaseActivity implements ViewTaskFragment.C
 
 
     @Override
-    public void onDelete(Uri taskUri)
+    public void onDelete(Uri taskUri, Color taskColor)
     {
         /*
          * The task we're showing has been deleted, just finish.
