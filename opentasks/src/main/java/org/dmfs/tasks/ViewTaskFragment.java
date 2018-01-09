@@ -29,6 +29,7 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.AppBarLayout.OnOffsetChangedListener;
 import android.support.design.widget.CoordinatorLayout;
@@ -54,6 +55,7 @@ import org.dmfs.android.bolts.color.colors.ValueColor;
 import org.dmfs.android.retentionmagic.SupportFragment;
 import org.dmfs.android.retentionmagic.annotations.Parameter;
 import org.dmfs.android.retentionmagic.annotations.Retain;
+import org.dmfs.optional.Optional;
 import org.dmfs.tasks.contract.TaskContract.Tasks;
 import org.dmfs.tasks.model.ContentSet;
 import org.dmfs.tasks.model.Model;
@@ -70,6 +72,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import gk.android.investigator.Investigator;
+
 
 /**
  * A fragment representing a single Task detail screen. This fragment is either contained in a {@link TaskListActivity} in two-pane mode (on tablets) or in a
@@ -82,6 +86,7 @@ public class ViewTaskFragment extends SupportFragment
         implements OnModelLoadedListener, OnContentChangeListener, OnMenuItemClickListener, OnOffsetChangedListener
 {
     private final static String ARG_URI = "uri";
+    private final static String ARG_COLOR_HINT = "color_hint";
 
     /**
      * A set of values that may affect the recurrence set of a task. If one of these values changes we have to submit all of them.
@@ -182,7 +187,7 @@ public class ViewTaskFragment extends SupportFragment
          * @param taskUri
          *         The {@link Uri} of the deleted task. Note that the Uri is likely to be invalid at the time of calling this method.
          */
-        void onDelete(Uri taskUri);
+        void onDelete(Uri taskUri, org.dmfs.android.bolts.color.Color taskColor);
 
         /**
          * Notifies the listener about the list color of the current task.
@@ -194,16 +199,18 @@ public class ViewTaskFragment extends SupportFragment
     }
 
 
-    public static ViewTaskFragment newInstance(Uri uri)
+    public static ViewTaskFragment newInstance(@NonNull Uri uri, @NonNull Optional<org.dmfs.android.bolts.color.Color> colorHint)
     {
-        ViewTaskFragment result = new ViewTaskFragment();
-        if (uri != null)
+        ViewTaskFragment fragment = new ViewTaskFragment();
+        Bundle args = new Bundle();
+        args.putParcelable(ARG_URI, uri);
+        if (colorHint.isPresent())
         {
-            Bundle args = new Bundle();
-            args.putParcelable(ARG_URI, uri);
-            result.setArguments(args);
+            args.putInt(ARG_COLOR_HINT, colorHint.value().argb());
         }
-        return result;
+        fragment.setArguments(args);
+        Investigator.log(ViewTaskFragment.class, "uri", LogUtil.desc(uri), "fragment", LogUtil.desc(fragment));
+        return fragment;
     }
 
 
@@ -212,6 +219,7 @@ public class ViewTaskFragment extends SupportFragment
      */
     public ViewTaskFragment()
     {
+        Investigator.log(this);
     }
 
 
@@ -256,7 +264,7 @@ public class ViewTaskFragment extends SupportFragment
 
         if (mContent != null)
         {
-            mContent.removeAllViews();
+//            mContent.removeAllViews();
         }
 
         if (mDetailView != null)
@@ -319,6 +327,9 @@ public class ViewTaskFragment extends SupportFragment
             loadUri(uri);
         }
 
+        mListColor = getArguments().getInt("color-hint", 0);
+        updateColor();
+
         return mRootView;
     }
 
@@ -360,7 +371,7 @@ public class ViewTaskFragment extends SupportFragment
      * @param uri
      *         The {@link Uri} of the task to show.
      */
-    public void loadUri(Uri uri)
+    private void loadUri(Uri uri)
     {
         showFloatingActionButton(false);
 
@@ -415,6 +426,7 @@ public class ViewTaskFragment extends SupportFragment
      */
     private void updateView()
     {
+        Investigator.log(this, "mContentSet", mContentSet);
         Activity activity = getActivity();
         if (mContent != null && activity != null)
         {
@@ -570,7 +582,7 @@ public class ViewTaskFragment extends SupportFragment
                     {
                         // TODO: remove the task in a background task
                         mContentSet.delete(mAppContext);
-                        mCallback.onDelete(mTaskUri);
+                        mCallback.onDelete(mTaskUri, new org.dmfs.android.bolts.color.elementary.ValueColor(mListColor));
                     }
                 }
             }).setMessage(R.string.confirm_delete_message).create().show();
@@ -634,7 +646,7 @@ public class ViewTaskFragment extends SupportFragment
         Snackbar.make(getActivity().getWindow().getDecorView(), getString(R.string.toast_task_completed, TaskFieldAdapters.TITLE.get(mContentSet)),
                 Snackbar.LENGTH_SHORT).show();
         // at present we just handle it like deletion, i.e. close the task in phone mode, do nothing in tablet mode
-        mCallback.onDelete(mTaskUri);
+        mCallback.onDelete(mTaskUri, new org.dmfs.android.bolts.color.elementary.ValueColor(mListColor));
         if (mShowFloatingActionButton)
         {
             // hide fab in two pane mode
